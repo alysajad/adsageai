@@ -30,11 +30,26 @@
             <div class="hero-section">
                 <h1>Unlock AI-Powered<br>Marketing Insights</h1>
 
-                <div class="input-wrapper">
-                    <input type="text" class="input-box" id="urlInput"
-                        placeholder="Paste your Instagram or LinkedIn post link here...">
-                    <button class="analyze-btn" id="analyzeBtn">
-                        Analyze <i class="fa-solid fa-arrow-right"></i>
+                <div class="upload-container" id="dropZone"
+                    style="border: 2px dashed var(--glass-border); padding: 2rem; border-radius: 1rem; text-align: center; background: rgba(255,255,255,0.05);">
+                    <i class="fa-solid fa-cloud-arrow-up"
+                        style="font-size: 3rem; color: var(--primary-neon); margin-bottom: 1rem;"></i>
+                    <p style="margin-bottom: 1rem;">Drag & Drop your Image here or <span
+                            style="color: var(--primary-neon); cursor: pointer;"
+                            onclick="document.getElementById('fileInput').click()">Browse</span></p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+                    <div id="previewContainer" class="hidden" style="margin-top: 1rem;">
+                        <img id="imagePreview" src="" alt="Preview"
+                            style="max-height: 200px; border-radius: 0.5rem; max-width: 100%;">
+                        <p id="fileName" style="font-size: 0.8rem; color: #888; margin-top: 0.5rem;"></p>
+                    </div>
+
+                    <textarea id="captionInput" placeholder="Enter your draft caption..."
+                        style="width: 100%; margin-top: 1rem; padding: 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; border-radius: 0.5rem; min-height: 80px;"></textarea>
+
+                    <button class="primary-btn" id="analyzeBtn" style="margin-top: 1rem; width: 100%;">
+                        Analyze Draft <i class="fa-solid fa-sparkles"></i>
                     </button>
                 </div>
             </div>

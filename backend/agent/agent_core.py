@@ -1,7 +1,17 @@
 from google import genai
 from google.genai import types
 from tools.load_json import load_linkedin_comments
+try:
+    from backend.agent.hashtag_scraper import scrape_hashtags
+except ImportError:
+    try:
+        from agent.hashtag_scraper import scrape_hashtags
+    except ImportError:
+         from hashtag_scraper import scrape_hashtags
+from PIL import Image
 import os
+import json
+import ast
 
 def run_analysis(data_file="linkedin_comments.json", platform="linkedin"):
     """
@@ -153,4 +163,87 @@ def run_analysis(data_file="linkedin_comments.json", platform="linkedin"):
         if not results["error"]:
              results["error"] = msg
 
+    return results
+
+def analyze_draft(image_path, caption):
+    """
+    Analyzes a draft post (Image + Caption) using Gemini Vision.
+    """
+    results = {
+        "success": False,
+        "prediction": {},
+        "error": None
+    }
+    
+    print(f"STEP 1: Analyzing Draft - Image: {image_path}, Caption: {caption}")
+    
+    try:
+        client = genai.Client()
+        
+        # Load Prompt
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(base_dir, "prompts", "predictive_analysis.prompt")
+        
+        with open(prompt_path, "r") as f:
+            instructions = f.read()
+            
+        # Load Image
+        image = Image.open(image_path)
+        
+        print("STEP 2: Sending to Gemini Vision...")
+        
+        # Create Chat with System Instructions
+        # Note: For Vision, we often just generate_content with system_instruction in config
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[image, f"Caption: {caption}"],
+            config=types.GenerateContentConfig(
+                system_instruction=instructions
+            )
+        )
+        
+        print("STEP 3: Response received.")
+        
+        # Clean and Parse JSON
+        raw_text = response.text.replace("```json", "").replace("```", "").strip()
+        
+        try:
+            data = json.loads(raw_text)
+        except Exception as e_json:
+            print(f"⚠️ JSON Parse Error ({e_json}). Attempting ast.literal_eval fallback...")
+            try:
+                # Fallback for single quotes or python-style dicts
+                data = ast.literal_eval(raw_text)
+            except Exception as e2:
+                print(f"❌ Critical Parsing Error: {e2}")
+                # Return a safe error structure so frontend doesn't crash
+                data = {
+                    "summary": "AI Error: Could not parse response.",
+                    "predicted_engagement": 0,
+                    "age_group_reactions": {"youth": "Error", "adult": "Error", "senior": "Error"},
+                    "optimization_tips": ["Please retry analysis."],
+                    "hashtags": []
+                }
+        
+        results["success"] = True
+
+        # Dynamic Hashtag Scraping Logic
+        if "hashtag_search_query" in data and data["hashtag_search_query"]:
+             query = data["hashtag_search_query"]
+             print(f"STEP 4: Scraping hashtags for query: '{query}'...")
+             scraped_tags = scrape_hashtags(query)
+             if scraped_tags:
+                 print(f"STEP 5: Found {len(scraped_tags)} dynamic hashtags.")
+                 # Prioritize scraped tags, maybe keep a few AI ones if needed, or just replace.
+                 # Strategy: Use scraped tags primarily.
+                 data["hashtags"] = scraped_tags
+             else:
+                 print("STEP 5: No dynamic hashtags found, keeping AI suggestions.")
+        
+        results["prediction"] = data
+        
+    except Exception as e:
+        print(f"❌ Analysis Error: {e}")
+        results["error"] = str(e)
+        
     return results

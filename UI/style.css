@@ -111,6 +111,23 @@ h1 {
     margin-top: 2rem;
 }
 
+.upload-container {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.upload-container .analyze-btn {
+    position: relative;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    height: 50px;
+    justify-content: center;
+}
+
 .input-box {
     width: 100%;
     padding: 1.2rem 1.5rem;
@@ -134,6 +151,7 @@ h1 {
     box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
 }
 
+/* Legacy pill button */
 .analyze-btn {
     position: absolute;
     right: 8px;
@@ -154,15 +172,38 @@ h1 {
     gap: 0.5rem;
 }
 
+/* General Action Button */
+.primary-btn {
+    padding: 0 1.5rem;
+    height: 50px;
+    border: none;
+    border-radius: 40px;
+    /* Matching the pill shape or less rounded if preferred */
+    background: linear-gradient(90deg, var(--secondary-violet), #9d4eff);
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.primary-btn:hover,
 .analyze-btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--glow-violet);
 }
 
+.primary-btn i,
 .analyze-btn i {
     transition: transform 0.3s ease;
 }
 
+.primary-btn:hover i,
 .analyze-btn:hover i {
     transform: rotate(90deg);
 }
